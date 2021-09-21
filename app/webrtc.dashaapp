@@ -1,0 +1,18 @@
+{
+  "formatVersion": "2",
+  "dialogue": {
+    "file": "main.dsl"
+  },
+  "nlu": {
+    "language": "en-US",
+    "skills": [
+      "sentiment"
+    ]
+  },
+  "nlg": {
+    "type": "phrases",
+    "file": "phrasemap.json",
+    "signatureFile": "phrasemap.json"
+  },
+  "name": "webrtc"
+}
