@@ -7,9 +7,6 @@ start node root {
     do {
         #connectSafe($endpoint);
         #waitForSpeech(1000);
-        #sayText("Hello " + $name);
-        #sayText("Now i can work into browser by web rtc!");
-        #sayText("Okay, i can repeat your phrase just for fun. Let's say something!");
         wait *;
     }
 
