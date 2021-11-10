@@ -4,10 +4,7 @@ const api = "http://localhost:8000";
 const runButton = document.getElementById("runButton");
 const hangupButton = document.getElementById("hangupButton");
 const uploadInput = document.getElementById("uploadInput");
-
 const context = new AudioContext();
-const gainNode = context.createGain();
-gainNode.connect(context.destination);
 
 const getAccount = async () => {
   const response = await fetch(`${api}/sip`);
@@ -42,14 +39,13 @@ const uploadRecord = (file) => {
 
       reader.onload = (event) => {
         context.decodeAudioData(event.target.result, (buffer) => {
+          const gainNode = context.createGain();
+          gainNode.connect(context.destination);
+
           const soundSource = context.createBufferSource();
           soundSource.buffer = buffer;
-          soundSource.start(0);
           soundSource.connect(gainNode);
-
-          const destination = context.createMediaStreamDestination();
-          soundSource.connect(destination);
-          resolve(destination)
+          resolve(soundSource)
         });
       }
     }
@@ -59,7 +55,7 @@ const uploadRecord = (file) => {
 const main = async () => {
   const { aor, endpoint } = await getAccount();
   const user = await createUser(aor, endpoint);
-  let localMediaStream;
+  let soundSource;
 
   const audio = new Audio();
   user.delegate = {
@@ -68,8 +64,12 @@ const main = async () => {
       runButton.hidden = true;
       hangupButton.hidden = false;
       hangupButton.disabled = false;
-      
-      user.localMediaStream = localMediaStream;
+
+      const destination = context.createMediaStreamDestination();
+      soundSource.connect(destination);
+      soundSource.start(0);
+
+      user.localMediaStream = destination;
       audio.srcObject = user.remoteMediaStream;
       audio.play();
     },
@@ -82,7 +82,7 @@ const main = async () => {
   };
 
   runButton.addEventListener("click", async () => {
-    localMediaStream = await uploadRecord();
+    soundSource = await uploadRecord();
 
     runButton.disabled = true;
     runCall(aor, "Peter").catch(() => {
